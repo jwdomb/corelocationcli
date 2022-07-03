@@ -90,7 +90,10 @@ class Delegate: NSObject, CLLocationManagerDelegate {
         
         switch format {
         case .json:
-            print(try! JSONEncoder().encode(formattedParts))
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = .prettyPrinted
+            let data = try! encoder.encode(formattedParts)
+            print(String(data: data, encoding: .utf8)!)
         case .string(let output):
             print(formattedParts.reduce(output, { partialResult, keyValuePair in
                 partialResult.replacingOccurrences(of: "%\(keyValuePair.key)", with: keyValuePair.value ?? "")
