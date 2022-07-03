@@ -82,6 +82,9 @@ class Delegate: NSObject, CLLocationManagerDelegate {
             "subThoroughfare": placemark?.subThoroughfare,
             "region": placemark?.region?.identifier,
             "timeZone": placemark?.timeZone?.identifier,
+            "inlandWater": placemark?.inlandWater,
+            "ocean": placemark?.ocean,
+            "areasOfInterest": placemark?.areasOfInterest?.joined(separator: "; "),
             "time_local": locatedTime,
 
             // Address
@@ -173,6 +176,9 @@ class Delegate: NSObject, CLLocationManagerDelegate {
             %subThoroughfare       Additional street-level information
             %region                Reverse geocoded geographic region
             %timeZone              Reverse geocoded time zone
+            %inlandWater           Reverse geocoded name of inland water body
+            %ocean                 Reverse geocoded name of ocean
+            %areasOfInterest       Reverse geocoded areas of interest (; separator)
             %time_local            Localized time using reverse geocoded time zone
           -j, --json               Prints a JSON object with all information available
         
@@ -196,7 +202,7 @@ for (i, argument) in ProcessInfo().arguments.enumerated() {
     case "-f", "--format":
         if ProcessInfo().arguments.count > i+1 {
             delegate.format = .string(ProcessInfo().arguments[i+1])
-            let placemarkStrings = ["%address", "%name", "%isoCountryCode", "%country", "%postalCode", "%administrativeArea", "%subAdministrativeArea", "%locality", "%subLocality", "%thoroughfare", "%subThoroughfare", "%region", "%timeZone", "%time_local"]
+            let placemarkStrings = ["%address", "%name", "%isoCountryCode", "%country", "%postalCode", "%administrativeArea", "%subAdministrativeArea", "%locality", "%subLocality", "%thoroughfare", "%subThoroughfare", "%region", "%inlandWater", "%ocean", "%areasOfInterest", "%timeZone", "%time_local"]
             if placemarkStrings.contains(where:ProcessInfo().arguments[i+1].contains) {
                 delegate.requiresPlacemarkLookup = true
             }
