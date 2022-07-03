@@ -94,7 +94,9 @@ class Delegate: NSObject, CLLocationManagerDelegate {
         switch format {
         case .json:
             let encoder = JSONEncoder()
-            encoder.outputFormatting = .prettyPrinted
+            if !self.follow {
+                encoder.outputFormatting = .prettyPrinted
+            }
             let data = try! encoder.encode(formattedParts)
             print(String(data: data, encoding: .utf8)!)
         case .string(let output):
