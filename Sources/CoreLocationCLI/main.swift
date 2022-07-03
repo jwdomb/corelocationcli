@@ -65,8 +65,8 @@ class Delegate: NSObject, CLLocationManagerDelegate {
             "altitude": String(format: "%0.2f", location.altitude),
             "direction": "\(location.course)",
             "speed": "\(Int(location.speed))",
-            "h_accuracy": "\(Int(location.horizontalAccuracy))",
-            "v_accuracy": "\(Int(location.verticalAccuracy))",
+            "horizontalAccuracy": "\(Int(location.horizontalAccuracy))",
+            "verticalAccuracy": "\(Int(location.verticalAccuracy))",
             "time": location.timestamp.description,
 
             // Placemark
@@ -85,7 +85,7 @@ class Delegate: NSObject, CLLocationManagerDelegate {
             "inlandWater": placemark?.inlandWater,
             "ocean": placemark?.ocean,
             "areasOfInterest": placemark?.areasOfInterest?.joined(separator: "; "),
-            "time_local": locatedTime,
+            "timeLocal": locatedTime,
 
             // Address
             "address": formattedPostalAddress
@@ -162,8 +162,8 @@ class Delegate: NSObject, CLLocationManagerDelegate {
             %altitude              Altitude (meters)
             %direction             Degrees from true north
             %speed                 Meters per second
-            %h_accuracy            Horizontal accuracy (meters)
-            %v_accuracy            Vertical accuracy (meters)
+            %horizontalAccuracy    Horizontal accuracy (meters)
+            %verticalAccuracy      Vertical accuracy (meters)
             %time                  Time
             %address               Reverse geocoded location to an address
             %name                  Reverse geocoded place name
@@ -181,7 +181,7 @@ class Delegate: NSObject, CLLocationManagerDelegate {
             %inlandWater           Reverse geocoded name of inland water body
             %ocean                 Reverse geocoded name of ocean
             %areasOfInterest       Reverse geocoded areas of interest (; separator)
-            %time_local            Localized time using reverse geocoded time zone
+            %timeLocal            Localized time using reverse geocoded time zone
           -j, --json               Prints a JSON object with all information available
         
           Default format if not specified is: %latitude %longitude.
@@ -204,7 +204,7 @@ for (i, argument) in ProcessInfo().arguments.enumerated() {
     case "-f", "--format":
         if ProcessInfo().arguments.count > i+1 {
             delegate.format = .string(ProcessInfo().arguments[i+1])
-            let placemarkStrings = ["%address", "%name", "%isoCountryCode", "%country", "%postalCode", "%administrativeArea", "%subAdministrativeArea", "%locality", "%subLocality", "%thoroughfare", "%subThoroughfare", "%region", "%inlandWater", "%ocean", "%areasOfInterest", "%timeZone", "%time_local"]
+            let placemarkStrings = ["%address", "%name", "%isoCountryCode", "%country", "%postalCode", "%administrativeArea", "%subAdministrativeArea", "%locality", "%subLocality", "%thoroughfare", "%subThoroughfare", "%region", "%inlandWater", "%ocean", "%areasOfInterest", "%timeZone", "%timeLocal"]
             if placemarkStrings.contains(where:ProcessInfo().arguments[i+1].contains) {
                 delegate.requiresPlacemarkLookup = true
             }
