@@ -1,10 +1,13 @@
-This repository contains software under multiple licenses.
+This repository contains software under multiple licenses. The general
+division is: work authored by Joseph W. Dombroski is under the first
+license below; earlier work from the upstream project is under the second.
+See the git history for specifics, with commit c13ccc92f9fa592f0063e5f650fa12f6ff2afa5e
+as the approximate boundary point.
 
 ---
 
-Portions, commit c13ccc92f9fa592f0063e5f650fa12f6ff2afa5e and later in
-particular, were authored by Joseph W. Dombroski using the following
-license:
+Portions authored by Joseph W. Dombroski (see git history) are under the
+following license:
 
 The MIT License (MIT)
 
@@ -31,9 +34,9 @@ SOFTWARE.
 
 ---
 
-Portions, commit f380a7bd9c0af97fff178c940edeae3c643bb02c
-and earlier in particular, were contributed by other users to
-https://github.com/fulldecent/corelocationcli using the following license:
+Portions contributed to the upstream project at
+https://github.com/fulldecent/corelocationcli (see git history) are under
+the following license:
 
 The MIT License (MIT)
 
