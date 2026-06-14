@@ -95,3 +95,5 @@ iOSInjectionProject/
 
 # Will added this
 /.swiftpm
+/CoreLocationCLI.app
+/CoreLocationCLI.zip

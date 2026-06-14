@@ -158,7 +158,7 @@ class Delegate: NSObject, CLLocationManagerDelegate {
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         if error._code == 1 {
-            print("CoreLocationCLI: ❌ Location services are disabled or location access denied. Please visit System Preferences > Security & Privacy > Privacy > Location Services")
+            print("CoreLocationCLI: ❌ Location services are disabled or location access denied. Please visit System Settings > Privacy & Security > Location Services")
             exit(1)
         } 
         print("CoreLocationCLI: ❌ \(error.localizedDescription)")
@@ -168,6 +168,7 @@ class Delegate: NSObject, CLLocationManagerDelegate {
     func help() {
         print("""
         USAGE: CoreLocationCLI --help
+               CoreLocationCLI --version
                CoreLocationCLI [--watch] [--verbose] [--format FORMAT]
                CoreLocationCLI [--watch] [--verbose] --json
 
@@ -229,6 +230,11 @@ class Delegate: NSObject, CLLocationManagerDelegate {
           compatible with the JSON Lines text format.
         """)
     }
+
+    func version() {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
+        print("CoreLocationCLI version \(version)")
+    }
 }
 
 let delegate = Delegate()
@@ -236,6 +242,9 @@ for (i, argument) in ProcessInfo().arguments.enumerated() {
     switch argument {
     case "-h", "--help":
         delegate.help()
+        exit(0)
+    case "--version":
+        delegate.version()
         exit(0)
     case "-w", "--watch":
         delegate.follow = true

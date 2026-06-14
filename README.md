@@ -2,12 +2,15 @@
 
 CoreLocationCLI gets the physical location of your device and prints it to standard output. If you move it can also print your updated location. *Kill it with CTRL-C.*
 
+This is a personal fork of [fulldecent/corelocationcli](https://github.com/fulldecent/corelocationcli) with additional features. See the git history and LICENSE for details on what changed.
+
 Note for Mac users: make sure Wi-Fi is turned on. Otherwise you will see `kCLErrorDomain error 0`.
 
 ## Usage
 
 ```sh
-CoreLocationCLI -h
+CoreLocationCLI --help
+CoreLocationCLI --version
 CoreLocationCLI [--watch] [--verbose] [--format FORMAT]
 CoreLocationCLI [--watch] [--verbose] --json
 ```
@@ -15,6 +18,7 @@ CoreLocationCLI [--watch] [--verbose] --json
 | Switch                   | Description                                            |
 | ------------------------ | ------------------------------------------------------ |
 | `-h, --help`             | Display this help message and exit                     |
+| `--version`              | Display the program version                            |
 | `-w, --watch`            | Continually print location                             |
 | `-v, --verbose`          | Show debugging output                                  |
 | `-f, --format FORMAT`    | Print a formatted string with the following specifiers |
@@ -79,8 +83,6 @@ CoreLocationCLI [--watch] [--verbose] --json
 | `%ocean`                 | Name of ocean                                          |
 | `%areasOfInterest`       | Areas of interest (; separator)                        |
 
-The default format is: `%latitude %longitude`.
-
 ## Schema versioning
 
 The JSON output includes a `schemaVersion` integer field. If you are parsing JSON output, check this field to detect breaking changes.
@@ -96,7 +98,7 @@ The JSON output includes a `schemaVersion` integer field. If you are parsing JSO
 ./CoreLocationCLI
 ```
 
-> ```
+> ```text
 > 50.943829 6.941043
 > ```
 
@@ -104,11 +106,11 @@ The JSON output includes a `schemaVersion` integer field. If you are parsing JSO
 ./CoreLocationCLI --format "%latitude %longitude\n%address"
 ```
 
-> ```
+> ```text
 > 50.943829 6.941043
 > Kaiser-Wilhelm-Ring 21
-> 	Cologne North Rhine-Westphalia 50672
-> 	Germany
+>  Cologne North Rhine-Westphalia 50672
+>  Germany
 > ```
 
 ```sh
@@ -157,30 +159,30 @@ The JSON output includes a `schemaVersion` integer field. If you are parsing JSO
 
 ## Installation
 
-Build from the command line using the Xcode compiler with one of these commands:
+This fork must be built from source:
 
 ```sh
-xcodebuild # requires Apple Developer account
-# ... or ...
-swift build --disable-sandbox -c release # does not require account
+swift build -c release
 ```
 
-Then run your executable from this location:
+The binary will be at `.build/release/CoreLocationCLI`.
 
-```sh
-./.build/arm64-apple-macosx/release/CoreLocationCLI --help
-```
-
-## macOS Gatekeeper/Notarization
+## macOS Gatekeeper/notarization
 
 After trying to run `CoreLocationCLI` for the first time, the process will be blocked by Gatekeeper, and a system dialog will appear which includes
 
 > "CoreLocationCLI" can't be opened because it is from an unidentified developer...
 
-To approve the process and allow `CoreLocationCLI` to run, go to System Preferences ➡️ Security & Privacy ➡️ General, and look in the bottom right corner for a button to click.
+To approve the process and allow `CoreLocationCLI` to run, go to System Settings ➡️ Privacy & Security ➡️ Security, and look in the bottom right corner for a button to click.
 
-After approving `CoreLocationCLI`, it should run successfully. For more information, see https://support.apple.com/en-us/HT202491.
+After approving `CoreLocationCLI`, it should run successfully. For more information, see <https://support.apple.com/en-us/HT202491>.
 
 ## Project scope
 
 This project exists to provide **a simple tool** for **getting a device's location**. It is expected that this will be **composed with other tools** or used directly for **testing** and **logging**.
+
+The project maintainer was a victim of kidnapping in his past. Meanwhile his laptop was opened by the captors, at the time CoreLocation CLI could have helped to identify the location of his captors. Since then, he continues to maintain the software, he uses the software so it could collect evidence in this situation again, and he is more careful about not getting kidnapped.
+
+## Contributing
+
+This is a personal fork and pull requests are not accepted. You are welcome to [open an issue](https://github.com/jwdomb/corelocationcli/issues). For the upstream project, visit [fulldecent/corelocationcli](https://github.com/fulldecent/corelocationcli).
