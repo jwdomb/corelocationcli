@@ -16,39 +16,79 @@ CoreLocationCLI [--watch] [--verbose] --json
 | ------------------------ | ------------------------------------------------------ |
 | `-h, --help`             | Display this help message and exit                     |
 | `-w, --watch`            | Continually print location                             |
-| `-v, -verbose`           | Show debugging output                                  |
+| `-v, --verbose`          | Show debugging output                                  |
 | `-f, --format FORMAT`    | Print a formatted string with the following specifiers |
 | `-j, --json`             | JSON output mode                                       |
 
+**Location**
+
 | Format                   | Description                                            |
 | ------------------------ | ------------------------------------------------------ |
-| `%latitude`              | Latitude (degrees north; or negative for south) |
-| `%longitude`             | Longitude (degrees west; or negative for east) |
-| `%altitude`              | Altitude (meters)                        |
-| `%direction`             | Degrees from true north                  |
-| `%speed`                 | Meters per second                        |
-| `%horizontalAccuracy`    | Horizontal accuracy (meters)             |
-| `%verticalAccuracy`      | Vertical accuracy (meters)               |
-| `%time`                  | Time                                     |
-| `%address`               | Reverse geocoded location to an address  |
-| `%name`                  | Reverse geocoded place name |
-| `%isoCountryCode`        | Reverse geocoded ISO country code |
-| `%country`               | Reverse geocoded country name |
-| `%postalCode`            | Reverse geocoded postal code |
-| `%administrativeArea`    | Reverse geocoded state or province |
-| `%subAdministrativeArea` | additional administrative area information |
-| `%locality`              | Reverse geocoded city name |
-| `%subLocality`           | additional city-level information |
-| `%thoroughfare`          | Reverse geocoded street address |
-| `%subThoroughfare`       | additional street-level information |
-| `%region`                | Reverse geocoded geographic region |
-| `%inlandWater`           | Reverse geocoded name of inland water body |
-| `%ocean`                 | Reverse geocoded name of ocean|
-| `%areasOfInterest`       | Reverse geocoded areas of interest (; separator) |
-| `%timeZone`              | Reverse geocoded time zone |
-| `%timeLocal`             | Localized time using reverse geocoded time zone |
+| `%latitude`              | Latitude (degrees north; or negative for south)        |
+| `%longitude`             | Longitude (degrees west; or negative for east)         |
+| `%altitude`              | Altitude above mean sea level (meters)                 |
+| `%ellipsoidalAltitude`   | Altitude above WGS 84 ellipsoid (meters; macOS 12+)    |
+| `%floor`                 | Building floor (if available)                          |
+| `%horizontalAccuracy`    | Horizontal accuracy (meters)                           |
+| `%verticalAccuracy`      | Vertical accuracy (meters)                             |
+| `%timestamp`             | Time the location was determined (UTC)                 |
+| `%timeLocal`             | Time the location was determined (local time zone)     |
+
+**Movement**
+
+| Format                   | Description                                            |
+| ------------------------ | ------------------------------------------------------ |
+| `%speed`                 | Speed (meters per second; negative if invalid)         |
+| `%speedAccuracy`         | Speed accuracy (meters per second)                     |
+| `%course`                | Course relative to true north (degrees; negative if invalid) |
+| `%courseAccuracy`        | Course accuracy (degrees)                              |
+
+**Heading** (if available)
+
+| Format                   | Description                                            |
+| ------------------------ | ------------------------------------------------------ |
+| `%magneticHeading`       | Heading relative to magnetic north (degrees)           |
+| `%trueHeading`           | Heading relative to true north (degrees)               |
+| `%headingAccuracy`       | Heading accuracy (degrees; negative if invalid)        |
+
+**Source** (macOS 12+)
+
+| Format                     | Description                                          |
+| -------------------------- | ---------------------------------------------------- |
+| `%isSimulatedBySoftware`   | Whether location was simulated by software (true/false) |
+| `%isProducedByAccessory`   | Whether location came from an external accessory (true/false) |
+
+**Placemark** (requires reverse geocoding)
+
+| Format                   | Description                                            |
+| ------------------------ | ------------------------------------------------------ |
+| `%address`               | Full formatted postal address                          |
+| `%name`                  | Place name                                             |
+| `%isoCountryCode`        | ISO country code                                       |
+| `%country`               | Country name                                           |
+| `%postalCode`            | Postal code                                            |
+| `%administrativeArea`    | State or province                                      |
+| `%subAdministrativeArea` | Additional administrative area information             |
+| `%locality`              | City name                                              |
+| `%subLocality`           | Additional city-level information                      |
+| `%thoroughfare`          | Street address                                         |
+| `%subThoroughfare`       | Additional street-level information                    |
+| `%region`                | Geographic region identifier                           |
+| `%timeZone`              | Time zone identifier                                   |
+| `%inlandWater`           | Name of inland water body                              |
+| `%ocean`                 | Name of ocean                                          |
+| `%areasOfInterest`       | Areas of interest (; separator)                        |
 
 The default format is: `%latitude %longitude`.
+
+## Schema versioning
+
+The JSON output includes a `schemaVersion` integer field. If you are parsing JSON output, check this field to detect breaking changes.
+
+**Version 2** (current) introduced the following breaking changes from version 1:
+
+- `direction` was renamed to `course`
+- `time` was renamed to `timestamp`
 
 ## Output examples
 
@@ -78,32 +118,42 @@ The default format is: `%latitude %longitude`.
 > ```json
 > {
 >     "address": "407 Keats Rd\nLower Moreland PA 19006\nUnited States",
->     "locality": "Lower Moreland",
->     "subThoroughfare": "407",
->     "time": "2019-10-03 04:10:05 +0000",
->     "areasOfInterest": null,
->     "subLocality": null,
 >     "administrativeArea": "PA",
->     "country": "United States",
->     "thoroughfare": "Keats Rd",
->     "ocean": null,
->     "region": "<+40.141196,-75.034815> radius 35.91",
->     "speed": "-1",
->     "latitude": "40.141196",
->     "name": "1354 Panther Rd",
 >     "altitude": "92.00",
->     "timeZone": "America/New_York",
->     "timeLocal": "2019-10-02 23:10:05 -0400",
->     "isoCountryCode": "US",
->     "longitude": "-75.034815",
->     "verticalAccuracy": "65",
->     "postalCode": "19006",
->     "inlandWater": null,
->     "direction": "-1.0",
+>     "areasOfInterest": null,
+>     "country": "United States",
+>     "course": "-1.0",
+>     "courseAccuracy": "-1.0",
+>     "ellipsoidalAltitude": "88.35",
+>     "floor": null,
+>     "headingAccuracy": "10.0",
 >     "horizontalAccuracy": "65",
->     "subAdministrativeArea": "Montgomery"
+>     "inlandWater": null,
+>     "isoCountryCode": "US",
+>     "isProducedByAccessory": "false",
+>     "isSimulatedBySoftware": "false",
+>     "latitude": "40.141196",
+>     "locality": "Lower Moreland",
+>     "longitude": "-75.034815",
+>     "magneticHeading": "224.3",
+>     "name": "1354 Panther Rd",
+>     "ocean": null,
+>     "postalCode": "19006",
+>     "region": "<+40.141196,-75.034815> radius 35.91",
+>     "schemaVersion": 2,
+>     "speed": "-1",
+>     "speedAccuracy": "-1",
+>     "subAdministrativeArea": "Montgomery",
+>     "subLocality": null,
+>     "subThoroughfare": "407",
+>     "thoroughfare": "Keats Rd",
+>     "timeLocal": "2019-10-02 23:10:05 -0400",
+>     "timeZone": "America/New_York",
+>     "timestamp": "2019-10-03 04:10:05 +0000",
+>     "trueHeading": "221.8",
+>     "verticalAccuracy": "65"
 > }
->  ```
+> ```
 
 ## Installation
 
