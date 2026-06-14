@@ -23,6 +23,7 @@ class Delegate: NSObject, CLLocationManagerDelegate {
     var format = OutputFormat.string("%latitude %longitude")
     var timeoutTimer: Timer? = nil
     var requiresPlacemarkLookup = false
+    var latestHeading: CLHeading? = nil
     
     func start() {
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
@@ -36,6 +37,9 @@ class Delegate: NSObject, CLLocationManagerDelegate {
         }
         timeoutTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false, block: {_ in self.timeout()})
         self.locationManager.startUpdatingLocation()
+        if CLLocationManager.headingAvailable() {
+            self.locationManager.startUpdatingHeading()
+        }
     }
 
     func timeout() {
@@ -59,15 +63,18 @@ class Delegate: NSObject, CLLocationManagerDelegate {
             locatedTime = formatter.string(from: time)
         }
         
-        let formattedParts: [String: String?] = [
+        var formattedParts: [String: String?] = [
             "latitude": String(format: "%0.6f", location.coordinate.latitude),
             "longitude": String(format: "%0.6f", location.coordinate.longitude),
             "altitude": String(format: "%0.2f", location.altitude),
-            "direction": "\(location.course)",
+            "course": "\(location.course)",
+            "courseAccuracy": "\(location.courseAccuracy)",
             "speed": "\(Int(location.speed))",
+            "speedAccuracy": "\(Int(location.speedAccuracy))",
             "horizontalAccuracy": "\(Int(location.horizontalAccuracy))",
             "verticalAccuracy": "\(Int(location.verticalAccuracy))",
-            "time": location.timestamp.description,
+            "timestamp": location.timestamp.description,
+            "floor": location.floor.map { "\($0.level)" },
 
             // Placemark
             "name": placemark?.name,
@@ -90,14 +97,24 @@ class Delegate: NSObject, CLLocationManagerDelegate {
             // Address
             "address": formattedPostalAddress
         ]
-        
+        if #available(macOS 12, *) {
+            formattedParts["ellipsoidalAltitude"] = String(format: "%0.2f", location.ellipsoidalAltitude)
+            formattedParts["isSimulatedBySoftware"] = location.sourceInformation.map { "\($0.isSimulatedBySoftware)" }
+            formattedParts["isProducedByAccessory"] = location.sourceInformation.map { "\($0.isProducedByAccessory)" }
+        }
+        if let heading = latestHeading {
+            formattedParts["magneticHeading"] = String(format: "%0.1f", heading.magneticHeading)
+            formattedParts["trueHeading"] = String(format: "%0.1f", heading.trueHeading)
+            formattedParts["headingAccuracy"] = String(format: "%0.1f", heading.headingAccuracy)
+        }
+
         switch format {
         case .json:
-            let encoder = JSONEncoder()
-            if !self.follow {
-                encoder.outputFormatting = .prettyPrinted
-            }
-            let data = try! encoder.encode(formattedParts)
+            var jsonObj: [String: Any] = formattedParts.mapValues { $0.map { $0 as Any } ?? NSNull() }
+            jsonObj["schemaVersion"] = 2
+            var options: JSONSerialization.WritingOptions = [.sortedKeys]
+            if !self.follow { options.insert(.prettyPrinted) }
+            let data = try! JSONSerialization.data(withJSONObject: jsonObj, options: options)
             print(String(data: data, encoding: .utf8)!)
         case .string(let output):
             print(formattedParts.reduce(output, { partialResult, keyValuePair in
@@ -135,6 +152,10 @@ class Delegate: NSObject, CLLocationManagerDelegate {
         }
     }
     
+    func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
+        latestHeading = newHeading
+    }
+
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         if error._code == 1 {
             print("CoreLocationCLI: ❌ Location services are disabled or location access denied. Please visit System Preferences > Security & Privacy > Privacy > Location Services")
@@ -151,41 +172,60 @@ class Delegate: NSObject, CLLocationManagerDelegate {
                CoreLocationCLI [--watch] [--verbose] --json
 
                Displays current location using CoreLocation services
-        
+
         OPTIONS:
-          -h, --help               Display this help message and exit
-          -w, --watch              Continually print location
-          -v, --verbose            Show debugging output
-          -f, --format FORMAT      Print a string with these substitutions
-            %latitude              Latitude (degrees north; or negative for south)
-            %longitude             Longitude (degrees west; or negative for east)
-            %altitude              Altitude (meters)
-            %direction             Degrees from true north
-            %speed                 Meters per second
-            %horizontalAccuracy    Horizontal accuracy (meters)
-            %verticalAccuracy      Vertical accuracy (meters)
-            %time                  Time
-            %address               Reverse geocoded location to an address
-            %name                  Reverse geocoded place name
-            %isoCountryCode        Reverse geocoded ISO country code
-            %country               Reverse geocoded country name
-            %postalCode            Reverse geocoded postal code
-            %administrativeArea    Reverse geocoded state or province
-            %subAdministrativeArea Additional administrative area information
-            %locality              Reverse geocoded city name
-            %subLocality           Additional city-level information
-            %thoroughfare          Reverse geocoded street address
-            %subThoroughfare       Additional street-level information
-            %region                Reverse geocoded geographic region
-            %timeZone              Reverse geocoded time zone
-            %inlandWater           Reverse geocoded name of inland water body
-            %ocean                 Reverse geocoded name of ocean
-            %areasOfInterest       Reverse geocoded areas of interest (; separator)
-            %timeLocal            Localized time using reverse geocoded time zone
-          -j, --json               Prints a JSON object with all information available
-        
+          -h, --help                    Display this help message and exit
+          -w, --watch                   Continually print location
+          -v, --verbose                 Show debugging output
+          -f, --format FORMAT           Print a string with these substitutions
+
+            Location
+            %latitude                   Latitude (degrees north; or negative for south)
+            %longitude                  Longitude (degrees west; or negative for east)
+            %altitude                   Altitude above mean sea level (meters)
+            %ellipsoidalAltitude        Altitude above WGS 84 ellipsoid (meters; macOS 12+)
+            %floor                      Building floor (if available)
+            %horizontalAccuracy         Horizontal accuracy (meters)
+            %verticalAccuracy           Vertical accuracy (meters)
+            %timestamp                  Time the location was determined (UTC)
+            %timeLocal                  Time the location was determined (local time zone)
+
+            Movement
+            %speed                      Speed (meters per second; negative if invalid)
+            %speedAccuracy              Speed accuracy (meters per second)
+            %course                     Course relative to true north (degrees; negative if invalid)
+            %courseAccuracy             Course accuracy (degrees)
+
+            Heading (if available)
+            %magneticHeading            Heading relative to magnetic north (degrees)
+            %trueHeading                Heading relative to true north (degrees)
+            %headingAccuracy            Heading accuracy (degrees; negative if invalid)
+
+            Source (macOS 12+)
+            %isSimulatedBySoftware      Whether location was simulated by software (true/false)
+            %isProducedByAccessory      Whether location came from an external accessory (true/false)
+
+            Placemark (requires reverse geocoding)
+            %address                    Full formatted postal address
+            %name                       Place name
+            %isoCountryCode             ISO country code
+            %country                    Country name
+            %postalCode                 Postal code
+            %administrativeArea         State or province
+            %subAdministrativeArea      Additional administrative area information
+            %locality                   City name
+            %subLocality                Additional city-level information
+            %thoroughfare               Street address
+            %subThoroughfare            Additional street-level information
+            %region                     Geographic region identifier
+            %timeZone                   Time zone identifier
+            %inlandWater                Name of inland water body
+            %ocean                      Name of ocean
+            %areasOfInterest            Areas of interest (; separator)
+          -j, --json                    Prints a JSON object with all information available
+
           Default format if not specified is: %latitude %longitude.
-          Using -json with -follow produces one line of JSON per location update. And is
+          Using --json with --watch produces one line of JSON per location update,
           compatible with the JSON Lines text format.
         """)
     }
