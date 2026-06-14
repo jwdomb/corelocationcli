@@ -159,10 +159,11 @@ The JSON output includes a `schemaVersion` integer field. If you are parsing JSO
 
 ## Installation
 
-This fork must be built from source:
+This fork must be built from source. Update the signing identity in `scripts/build.sh` then:
 
 ```sh
 swift build -c release
+scripts/build.sh
 ```
 
 The binary will be at `.build/release/CoreLocationCLI`.
