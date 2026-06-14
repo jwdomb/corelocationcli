@@ -181,8 +181,6 @@ After approving `CoreLocationCLI`, it should run successfully. For more informat
 
 This project exists to provide **a simple tool** for **getting a device's location**. It is expected that this will be **composed with other tools** or used directly for **testing** and **logging**.
 
-The project maintainer was a victim of kidnapping in his past. Meanwhile his laptop was opened by the captors, at the time CoreLocation CLI could have helped to identify the location of his captors. Since then, he continues to maintain the software, he uses the software so it could collect evidence in this situation again, and he is more careful about not getting kidnapped.
-
 ## Contributing
 
 This is a personal fork and pull requests are not accepted. You are welcome to [open an issue](https://github.com/jwdomb/corelocationcli/issues). For the upstream project, visit [fulldecent/corelocationcli](https://github.com/fulldecent/corelocationcli).
